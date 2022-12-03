@@ -73,7 +73,6 @@ public class PhotoGUI extends javax.swing.JFrame {
     public void displayImageAfterBlurAdjust() {
         //Convert from BufferedImage to display
         buffered = ConvertBufferedImage.convertTo(input, null, true);
-
         //Display to GUI
         displayImage();
     }
