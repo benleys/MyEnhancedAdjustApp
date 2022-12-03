@@ -14,28 +14,35 @@ import boofcv.io.image.UtilImageIO;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.ImageType;
 import boofcv.struct.image.Planar;
+import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  *
  * @author Medion
  */
 public class PhotoGUI extends javax.swing.JFrame {
-    // Get file and display
+    //Get file and display
     private File file;
     private BufferedImage buffered;
     private BufferedImage resetData;
     private ImageIcon imageIcon;
     private Image image;
-    // init (also for blur)
+    //Init (also for blur)
     private Planar<GrayU8> fileConverted;
     private Planar<GrayU8> input;
-    // check if at least one option is selected before image is saved to desktop
+    //Check if at least one option is selected before image is saved to desktop
     private boolean checkOptions = false;
-    // size of the blur kernel. square region with a width of radius*2 + 1
+    //Size of the blur kernel. square region with a width of radius*2 + 1
     private final int radius = 8;
 
     /**
@@ -67,7 +74,7 @@ public class PhotoGUI extends javax.swing.JFrame {
         //Convert from BufferedImage to display
         buffered = ConvertBufferedImage.convertTo(input, null, true);
 
-        //Display image in GUI
+        //Display to GUI
         displayImage();
     }
 
@@ -138,6 +145,11 @@ public class PhotoGUI extends javax.swing.JFrame {
                 jRadioButtonMeanMouseClicked(evt);
             }
         });
+        jRadioButtonMean.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMeanActionPerformed(evt);
+            }
+        });
 
         jCheckBoxDenoise.setText("Denoise");
         jCheckBoxDenoise.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -192,19 +204,19 @@ public class PhotoGUI extends javax.swing.JFrame {
                                 .addComponent(jTextFieldSaveName, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(18, 18, 18)
                         .addComponent(jLabelImage, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jRadioButtonMean, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jRadioButtonGaussian, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jRadioButtonMedian, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jRadioButtonMean, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jComboBoxThreshold, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabelBlurOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(jLabelThresholdOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(jLabelThresholdOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jRadioButtonMedian, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(30, 30, 30)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabelThresholdOptions1, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -252,10 +264,10 @@ public class PhotoGUI extends javax.swing.JFrame {
                         .addComponent(jRadioButtonGaussian)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jRadioButtonMedian)
-                            .addComponent(jComboBoxThreshold, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jComboBoxThreshold, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jRadioButtonMean))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jRadioButtonMean)
+                        .addComponent(jRadioButtonMedian)
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
@@ -266,6 +278,8 @@ public class PhotoGUI extends javax.swing.JFrame {
         //Get image with FileChooser
         file = BoofSwingUtil.fileChooser(null, null, true, ".", null, BoofSwingUtil.FileTypes.IMAGES);
         buffered = UtilImageIO.loadImageNotNull(file.getAbsolutePath());
+        
+        //Data to reset everything
         resetData = buffered;
 
         //init
@@ -278,7 +292,31 @@ public class PhotoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonBrowseImageActionPerformed
 
     private void jButtonSaveImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveImageActionPerformed
-
+        try {
+            if (file != null) {
+                String outputName = jTextFieldSaveName.getText();
+                String outputExtension = FilenameUtils.getExtension(file.getAbsolutePath().toLowerCase());
+                if (checkOptions == true) {
+                    if (!outputName.isEmpty()) {
+                        //Write image to dekstop
+                        ImageIO.write(buffered, outputExtension, new File("C:/Dev/Erasmus CODE/Java Advanced/NetBeansProjects/MyAdjustApp/app/src/main/java/MyAdjustApp/images/" + outputName + "." + outputExtension));                     
+                        JOptionPane.showMessageDialog(rootPane, "Image saved!");
+                        
+                        //Open and show on desktop
+                        Desktop desktop = Desktop.getDesktop();
+                        desktop.open(new File("C:/Dev/Erasmus CODE/Java Advanced/NetBeansProjects/MyAdjustApp/app/src/main/java/MyAdjustApp/images/" + outputName + "." + outputExtension));
+                    } else {
+                        JOptionPane.showMessageDialog(rootPane, "Give a name to the file in the inputfield");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(rootPane, "You need to use at least one of the options");
+                }
+            } else {
+                JOptionPane.showMessageDialog(rootPane, "You need to select an image first");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(PhotoGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButtonSaveImageActionPerformed
 
     private void jRadioButtonGaussianMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jRadioButtonGaussianMouseClicked
@@ -330,6 +368,10 @@ public class PhotoGUI extends javax.swing.JFrame {
     private void jCheckBoxDenoiseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBoxDenoiseMouseClicked
 
     }//GEN-LAST:event_jCheckBoxDenoiseMouseClicked
+
+    private void jRadioButtonMeanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMeanActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jRadioButtonMeanActionPerformed
 
     /**
      * @param args the command line arguments

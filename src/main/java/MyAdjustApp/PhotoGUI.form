@@ -47,13 +47,12 @@
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="jLabelImage" min="-2" pref="299" max="-2" attributes="0"/>
                   </Group>
-                  <Component id="jRadioButtonMean" alignment="0" min="-2" pref="98" max="-2" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="jRadioButtonGaussian" min="-2" pref="98" max="-2" attributes="0"/>
-                                  <Component id="jRadioButtonMedian" alignment="0" min="-2" pref="98" max="-2" attributes="0"/>
+                                  <Component id="jRadioButtonMean" alignment="0" min="-2" pref="98" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="jComboBoxThreshold" min="-2" max="-2" attributes="0"/>
@@ -63,6 +62,7 @@
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="jLabelThresholdOptions" min="-2" pref="109" max="-2" attributes="0"/>
                           </Group>
+                          <Component id="jRadioButtonMedian" alignment="0" min="-2" pref="98" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
@@ -126,11 +126,11 @@
                       <Component id="jRadioButtonGaussian" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="jRadioButtonMedian" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="jComboBoxThreshold" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jRadioButtonMean" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jRadioButtonMean" min="-2" max="-2" attributes="0"/>
+                      <Component id="jRadioButtonMedian" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
@@ -193,6 +193,7 @@
       </Properties>
       <Events>
         <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jRadioButtonMeanMouseClicked"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jRadioButtonMeanActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JCheckBox" name="jCheckBoxDenoise">
