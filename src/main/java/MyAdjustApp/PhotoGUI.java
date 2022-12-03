@@ -5,12 +5,17 @@
 package MyAdjustApp;
 
 import boofcv.abst.filter.blur.BlurFilter;
+import boofcv.alg.filter.binary.GThresholdImageOps;
 import boofcv.alg.filter.blur.BlurImageOps;
 import boofcv.alg.filter.blur.GBlurImageOps;
+import boofcv.alg.misc.ImageStatistics;
 import boofcv.factory.filter.blur.FactoryBlurFilter;
 import boofcv.gui.BoofSwingUtil;
+import boofcv.gui.binary.VisualizeBinaryData;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.UtilImageIO;
+import boofcv.struct.ConfigLength;
+import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.ImageType;
 import boofcv.struct.image.Planar;
@@ -40,6 +45,9 @@ public class PhotoGUI extends javax.swing.JFrame {
     //Init (also for blur)
     private Planar<GrayU8> fileConverted;
     private Planar<GrayU8> input;
+    // Threshold
+    private GrayF32 fileConvertedGray;
+    private GrayU8 binaryInput;
     //Check if at least one option is selected before image is saved to desktop
     private boolean checkOptions = false;
     //Size of the blur kernel. square region with a width of radius*2 + 1
@@ -73,6 +81,15 @@ public class PhotoGUI extends javax.swing.JFrame {
     public void displayImageAfterBlurAdjust() {
         //Convert from BufferedImage to display
         buffered = ConvertBufferedImage.convertTo(input, null, true);
+        
+        //Display to GUI
+        displayImage();
+    }
+    
+    public void displayImageAfterThresholdAdjust() {
+        //Convert from Binary to display
+        buffered = VisualizeBinaryData.renderBinary(binaryInput, false, null);
+
         //Display to GUI
         displayImage();
     }
@@ -142,11 +159,6 @@ public class PhotoGUI extends javax.swing.JFrame {
         jRadioButtonMean.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jRadioButtonMeanMouseClicked(evt);
-            }
-        });
-        jRadioButtonMean.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonMeanActionPerformed(evt);
             }
         });
 
@@ -357,7 +369,44 @@ public class PhotoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonResetMouseClicked
 
     private void jComboBoxThresholdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxThresholdActionPerformed
+        checkOptions = true;
+        //Get choice in checkbox
+        String choice = jComboBoxThreshold.getSelectedItem().toString();
 
+        //Convert into a usable format
+        fileConvertedGray = ConvertBufferedImage.convertFromSingle(buffered, null, GrayF32.class);
+        binaryInput = new GrayU8(fileConvertedGray.width, fileConvertedGray.height);
+
+        switch (choice) {
+            case "Gaussian":
+                //Local method
+                GThresholdImageOps.localGaussian(fileConvertedGray, binaryInput, ConfigLength.fixed(85), 1.0, true, null, null);
+                displayImageAfterThresholdAdjust();
+                break;
+            case "Mean":
+                //Global Methods
+                GThresholdImageOps.threshold(fileConvertedGray, binaryInput, ImageStatistics.mean(fileConvertedGray), true);
+                displayImageAfterThresholdAdjust();
+                break;
+            case "Niblack":
+                //Local Methods
+                GThresholdImageOps.localNiblack(fileConvertedGray, binaryInput, ConfigLength.fixed(11), 0.30f, true);
+                displayImageAfterThresholdAdjust();
+                break;
+            case "Wolf":
+                //Local Methods
+                GThresholdImageOps.localWolf(fileConvertedGray, binaryInput, ConfigLength.fixed(11), 0.30f, true);
+                displayImageAfterThresholdAdjust();
+                break;
+            case "Min-Max":
+                //Local Methods
+                GThresholdImageOps.blockMinMax(fileConvertedGray, binaryInput, ConfigLength.fixed(21), 1.0, true, 15);
+                displayImageAfterThresholdAdjust();
+                break;
+            default:
+                JOptionPane.showMessageDialog(rootPane, "Something went wrong with thresholding");
+                break;
+        }
     }//GEN-LAST:event_jComboBoxThresholdActionPerformed
 
     private void jCheckBoxNoisyMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBoxNoisyMouseClicked
@@ -367,10 +416,6 @@ public class PhotoGUI extends javax.swing.JFrame {
     private void jCheckBoxDenoiseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBoxDenoiseMouseClicked
 
     }//GEN-LAST:event_jCheckBoxDenoiseMouseClicked
-
-    private void jRadioButtonMeanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMeanActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jRadioButtonMeanActionPerformed
 
     /**
      * @param args the command line arguments
