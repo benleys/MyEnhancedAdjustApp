@@ -27,12 +27,14 @@ public class PhotoGUI extends javax.swing.JFrame {
     // Get file and display
     private File file;
     private BufferedImage buffered;
+    private BufferedImage resetData;
     private ImageIcon imageIcon;
     private Image image;
     // init (also for blur)
     private Planar<GrayU8> fileConverted;
     private Planar<GrayU8> input;
-    
+    // check if at least one option is selected before image is saved to desktop
+    private boolean checkOptions = false;
     // size of the blur kernel. square region with a width of radius*2 + 1
     private final int radius = 8;
 
@@ -47,8 +49,15 @@ public class PhotoGUI extends javax.swing.JFrame {
     }
     
     public void displayImage() {
-        //Display adjusted image on JLabel
-        imageIcon = new ImageIcon(buffered);
+        //Reset everything
+        if(checkOptions == false){
+            //Display adjusted image on JLabel
+            imageIcon = new ImageIcon(resetData);
+        //Display adjustment(s)
+        } else {
+            //Display image on JLabel
+            imageIcon = new ImageIcon(buffered);
+        }
         //Fit image to JLabel
         image = imageIcon.getImage().getScaledInstance(jLabelImage.getWidth(), jLabelImage.getHeight(), Image.SCALE_SMOOTH);
         jLabelImage.setIcon(new ImageIcon(image));
@@ -257,6 +266,7 @@ public class PhotoGUI extends javax.swing.JFrame {
         //Get image with FileChooser
         file = BoofSwingUtil.fileChooser(null, null, true, ".", null, BoofSwingUtil.FileTypes.IMAGES);
         buffered = UtilImageIO.loadImageNotNull(file.getAbsolutePath());
+        resetData = buffered;
 
         //init
         fileConverted = ConvertBufferedImage.convertFrom(buffered, true, ImageType.pl(3, GrayU8.class));
@@ -272,6 +282,7 @@ public class PhotoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonSaveImageActionPerformed
 
     private void jRadioButtonGaussianMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jRadioButtonGaussianMouseClicked
+        checkOptions = true;
         //Apply gaussian blur
         GBlurImageOps.gaussian(fileConverted, input, -1, radius, null);
 
@@ -280,6 +291,7 @@ public class PhotoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jRadioButtonGaussianMouseClicked
 
     private void jRadioButtonMedianMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jRadioButtonMedianMouseClicked
+        checkOptions = true;        
         //Apply median blur
         BlurImageOps.median(fileConverted, input, radius, radius, null);
 
@@ -288,6 +300,7 @@ public class PhotoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jRadioButtonMedianMouseClicked
 
     private void jRadioButtonMeanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jRadioButtonMeanMouseClicked
+        checkOptions = true;
         //Apply mean blur
         BlurFilter<Planar<GrayU8>> filterMean = FactoryBlurFilter.mean(fileConverted.getImageType(), radius);
         filterMean.process(fileConverted, input);
@@ -297,7 +310,13 @@ public class PhotoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jRadioButtonMeanMouseClicked
 
     private void jButtonResetMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonResetMouseClicked
+        checkOptions = false;
+        
+        //Unselect all
+        buttonGroup1.clearSelection();
 
+        //Display image in GUI
+        displayImage();
     }//GEN-LAST:event_jButtonResetMouseClicked
 
     private void jComboBoxThresholdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxThresholdActionPerformed
