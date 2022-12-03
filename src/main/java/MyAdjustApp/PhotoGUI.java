@@ -4,11 +4,30 @@
  */
 package MyAdjustApp;
 
+import boofcv.gui.BoofSwingUtil;
+import boofcv.io.image.ConvertBufferedImage;
+import boofcv.io.image.UtilImageIO;
+import boofcv.struct.image.GrayU8;
+import boofcv.struct.image.ImageType;
+import boofcv.struct.image.Planar;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import javax.swing.ImageIcon;
+
 /**
  *
  * @author Medion
  */
 public class PhotoGUI extends javax.swing.JFrame {
+    // Get file and display
+    private File file;
+    private BufferedImage buffered;
+    private ImageIcon imageIcon;
+    private Image image;
+    // init (also for blur)
+    private Planar<GrayU8> fileConverted;
+    private Planar<GrayU8> input;
 
     /**
      * Creates new form PhotoGUI
@@ -208,7 +227,18 @@ public class PhotoGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonBrowseImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseImageActionPerformed
+        file = BoofSwingUtil.fileChooser(null, null, true, ".", null, BoofSwingUtil.FileTypes.IMAGES);
+        buffered = UtilImageIO.loadImageNotNull(file.getAbsolutePath());
 
+        fileConverted = ConvertBufferedImage.convertFrom(buffered, true, ImageType.pl(3, GrayU8.class));
+        input = fileConverted.createSameShape();
+        //System.out.println(buffered);
+
+        //Display image on JLabel
+        imageIcon = new ImageIcon(buffered);
+        //Fit image to JLabel
+        image = imageIcon.getImage().getScaledInstance(jLabelImage.getWidth(), jLabelImage.getHeight(), Image.SCALE_SMOOTH);
+        jLabelImage.setIcon(new ImageIcon(image));
     }//GEN-LAST:event_jButtonBrowseImageActionPerformed
 
     private void jButtonSaveImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveImageActionPerformed
