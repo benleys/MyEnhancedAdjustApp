@@ -4,6 +4,10 @@
  */
 package MyAdjustApp;
 
+import boofcv.abst.filter.blur.BlurFilter;
+import boofcv.alg.filter.blur.BlurImageOps;
+import boofcv.alg.filter.blur.GBlurImageOps;
+import boofcv.factory.filter.blur.FactoryBlurFilter;
 import boofcv.gui.BoofSwingUtil;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.UtilImageIO;
@@ -28,6 +32,9 @@ public class PhotoGUI extends javax.swing.JFrame {
     // init (also for blur)
     private Planar<GrayU8> fileConverted;
     private Planar<GrayU8> input;
+    
+    // size of the blur kernel. square region with a width of radius*2 + 1
+    private final int radius = 8;
 
     /**
      * Creates new form PhotoGUI
@@ -37,6 +44,22 @@ public class PhotoGUI extends javax.swing.JFrame {
         initComponents();
         // GUI in center of screen
         this.setLocationRelativeTo(null);
+    }
+    
+    public void displayImage() {
+        //Display adjusted image on JLabel
+        imageIcon = new ImageIcon(buffered);
+        //Fit image to JLabel
+        image = imageIcon.getImage().getScaledInstance(jLabelImage.getWidth(), jLabelImage.getHeight(), Image.SCALE_SMOOTH);
+        jLabelImage.setIcon(new ImageIcon(image));
+    }
+    
+    public void displayImageAfterBlurAdjust() {
+        //Convert from BufferedImage to display
+        buffered = ConvertBufferedImage.convertTo(input, null, true);
+
+        //Display image in GUI
+        displayImage();
     }
 
     /**
@@ -48,6 +71,7 @@ public class PhotoGUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jLabelImage = new javax.swing.JLabel();
         jButtonBrowseImage = new javax.swing.JButton();
         jButtonSaveImage = new javax.swing.JButton();
@@ -80,6 +104,7 @@ public class PhotoGUI extends javax.swing.JFrame {
             }
         });
 
+        buttonGroup1.add(jRadioButtonGaussian);
         jRadioButtonGaussian.setText("Gaussian");
         jRadioButtonGaussian.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -89,6 +114,7 @@ public class PhotoGUI extends javax.swing.JFrame {
 
         jLabelBlurOptions.setText("Blur Options:");
 
+        buttonGroup1.add(jRadioButtonMedian);
         jRadioButtonMedian.setText("Median");
         jRadioButtonMedian.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -96,6 +122,7 @@ public class PhotoGUI extends javax.swing.JFrame {
             }
         });
 
+        buttonGroup1.add(jRadioButtonMean);
         jRadioButtonMean.setText("Mean");
         jRadioButtonMean.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -227,18 +254,17 @@ public class PhotoGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonBrowseImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseImageActionPerformed
+        //Get image with FileChooser
         file = BoofSwingUtil.fileChooser(null, null, true, ".", null, BoofSwingUtil.FileTypes.IMAGES);
         buffered = UtilImageIO.loadImageNotNull(file.getAbsolutePath());
 
+        //init
         fileConverted = ConvertBufferedImage.convertFrom(buffered, true, ImageType.pl(3, GrayU8.class));
         input = fileConverted.createSameShape();
         //System.out.println(buffered);
-
-        //Display image on JLabel
-        imageIcon = new ImageIcon(buffered);
-        //Fit image to JLabel
-        image = imageIcon.getImage().getScaledInstance(jLabelImage.getWidth(), jLabelImage.getHeight(), Image.SCALE_SMOOTH);
-        jLabelImage.setIcon(new ImageIcon(image));
+        
+        //Display image in GUI
+        displayImage();
     }//GEN-LAST:event_jButtonBrowseImageActionPerformed
 
     private void jButtonSaveImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveImageActionPerformed
@@ -246,15 +272,28 @@ public class PhotoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonSaveImageActionPerformed
 
     private void jRadioButtonGaussianMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jRadioButtonGaussianMouseClicked
+        //Apply gaussian blur
+        GBlurImageOps.gaussian(fileConverted, input, -1, radius, null);
 
+        //Display image in GUI after blur filter
+        displayImageAfterBlurAdjust();
     }//GEN-LAST:event_jRadioButtonGaussianMouseClicked
 
     private void jRadioButtonMedianMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jRadioButtonMedianMouseClicked
+        //Apply median blur
+        BlurImageOps.median(fileConverted, input, radius, radius, null);
 
+        //Display image in GUI after blur filter
+        displayImageAfterBlurAdjust();
     }//GEN-LAST:event_jRadioButtonMedianMouseClicked
 
     private void jRadioButtonMeanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jRadioButtonMeanMouseClicked
+        //Apply mean blur
+        BlurFilter<Planar<GrayU8>> filterMean = FactoryBlurFilter.mean(fileConverted.getImageType(), radius);
+        filterMean.process(fileConverted, input);
 
+        //Display image in GUI after blur filter
+        displayImageAfterBlurAdjust();
     }//GEN-LAST:event_jRadioButtonMeanMouseClicked
 
     private void jButtonResetMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonResetMouseClicked
@@ -309,6 +348,7 @@ public class PhotoGUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton jButtonBrowseImage;
     private javax.swing.JButton jButtonReset;
     private javax.swing.JButton jButtonSaveImage;
