@@ -4,10 +4,13 @@
  */
 package MyAdjustApp;
 
+import boofcv.abst.denoise.FactoryImageDenoise;
+import boofcv.abst.denoise.WaveletDenoiseFilter;
 import boofcv.abst.filter.blur.BlurFilter;
 import boofcv.alg.filter.binary.GThresholdImageOps;
 import boofcv.alg.filter.blur.BlurImageOps;
 import boofcv.alg.filter.blur.GBlurImageOps;
+import boofcv.alg.misc.GImageMiscOps;
 import boofcv.alg.misc.ImageStatistics;
 import boofcv.factory.filter.blur.FactoryBlurFilter;
 import boofcv.gui.BoofSwingUtil;
@@ -24,6 +27,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -48,6 +52,10 @@ public class PhotoGUI extends javax.swing.JFrame {
     // Threshold
     private GrayF32 fileConvertedGray;
     private GrayU8 binaryInput;
+    // Noise
+    private GrayF32 noiseInput;
+    private GrayF32 noisy;
+    private GrayF32 denoised;
     //Check if at least one option is selected before image is saved to desktop
     private boolean checkOptions = false;
     //Size of the blur kernel. square region with a width of radius*2 + 1
@@ -93,6 +101,22 @@ public class PhotoGUI extends javax.swing.JFrame {
         //Display to GUI
         displayImage();
     }
+    
+    public void displayImageAfterNoisyAdjust() {
+        //Convert from BufferedImage to display
+        buffered = ConvertBufferedImage.convertTo(noisy, null);
+
+        //Display to GUI
+        displayImage();
+    }
+
+    public void displayImageAfterDenoiseAdjust() {
+        //Convert from BufferedImage to display
+        buffered = ConvertBufferedImage.convertTo(denoised, null);
+
+        //Display to GUI
+        displayImage();
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -104,6 +128,7 @@ public class PhotoGUI extends javax.swing.JFrame {
     private void initComponents() {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
+        buttonGroup2 = new javax.swing.ButtonGroup();
         jLabelImage = new javax.swing.JLabel();
         jButtonBrowseImage = new javax.swing.JButton();
         jButtonSaveImage = new javax.swing.JButton();
@@ -162,6 +187,7 @@ public class PhotoGUI extends javax.swing.JFrame {
             }
         });
 
+        buttonGroup2.add(jCheckBoxDenoise);
         jCheckBoxDenoise.setText("Denoise");
         jCheckBoxDenoise.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -187,6 +213,7 @@ public class PhotoGUI extends javax.swing.JFrame {
             }
         });
 
+        buttonGroup2.add(jCheckBoxNoisy);
         jCheckBoxNoisy.setText("Noisy");
         jCheckBoxNoisy.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -363,6 +390,8 @@ public class PhotoGUI extends javax.swing.JFrame {
         
         //Unselect all
         buttonGroup1.clearSelection();
+        jComboBoxThreshold.setSelectedIndex(0);
+        buttonGroup2.clearSelection();
 
         //Display image in GUI
         displayImage();
@@ -410,11 +439,35 @@ public class PhotoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jComboBoxThresholdActionPerformed
 
     private void jCheckBoxNoisyMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBoxNoisyMouseClicked
+        checkOptions = true;
+        //Load the input image
+        Random rand = new Random(234);
+        noiseInput = UtilImageIO.loadImage(file.getAbsolutePath(), GrayF32.class);
 
+        //Create a noisy image
+        noisy = noiseInput.clone();
+        GImageMiscOps.addGaussian(noisy, rand, 20, 0, 255);
+        
+        displayImageAfterNoisyAdjust();
     }//GEN-LAST:event_jCheckBoxNoisyMouseClicked
 
     private void jCheckBoxDenoiseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBoxDenoiseMouseClicked
+        checkOptions = true;
+        //Load the input image
+        noiseInput = UtilImageIO.loadImage(file.getAbsolutePath(), GrayF32.class);
 
+        //Create a noisy image
+        noisy = noiseInput.clone();
+        denoised = noisy.createSameShape();
+        
+        //How many levels in wavelet transform
+        int numlevels = 4;
+        //Noise removal algorithm
+        WaveletDenoiseFilter<GrayF32> denoiser = FactoryImageDenoise.waveletBayes(GrayF32.class, numlevels, 0, 255);
+        //Remove noise from image
+        denoiser.process(noisy, denoised);
+        
+        displayImageAfterDenoiseAdjust();
     }//GEN-LAST:event_jCheckBoxDenoiseMouseClicked
 
     /**
@@ -454,6 +507,7 @@ public class PhotoGUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.ButtonGroup buttonGroup2;
     private javax.swing.JButton jButtonBrowseImage;
     private javax.swing.JButton jButtonReset;
     private javax.swing.JButton jButtonSaveImage;
