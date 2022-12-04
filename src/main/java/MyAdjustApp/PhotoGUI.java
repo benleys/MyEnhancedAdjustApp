@@ -71,19 +71,25 @@ public class PhotoGUI extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
     }
     
-    public void displayImage() {
-        //Reset everything
-        if(checkOptions == false){
-            //Display adjusted image on JLabel
-            imageIcon = new ImageIcon(resetData);
-        //Display adjustment(s)
-        } else {
-            //Display image on JLabel
-            imageIcon = new ImageIcon(buffered);
-        }
+    public void displayImageBefore() {
+        //Display adjusted image on JLabel
+        imageIcon = new ImageIcon(buffered);
         //Fit image to JLabel
-        image = imageIcon.getImage().getScaledInstance(jLabelImage.getWidth(), jLabelImage.getHeight(), Image.SCALE_SMOOTH);
-        jLabelImage.setIcon(new ImageIcon(image));
+        image = imageIcon.getImage().getScaledInstance(jLabelImageBefore.getWidth(), jLabelImageBefore.getHeight(), Image.SCALE_SMOOTH);
+        jLabelImageBefore.setIcon(new ImageIcon(image));
+    }
+    
+    public void displayImageAfter() {
+        //Display adjusted image on JLabel
+        imageIcon = new ImageIcon(buffered);
+        //Fit image to JLabel
+        image = imageIcon.getImage().getScaledInstance(jLabelImageAfter.getWidth(), jLabelImageAfter.getHeight(), Image.SCALE_SMOOTH);
+        jLabelImageAfter.setIcon(new ImageIcon(image));
+    }
+    
+    public void displayImageAfterReset() {
+        jLabelImageAfter.setIcon( null );
+        jLabelImageAfter.setText("Adjusted");
     }
     
     public void displayImageAfterBlurAdjust() {
@@ -91,7 +97,7 @@ public class PhotoGUI extends javax.swing.JFrame {
         buffered = ConvertBufferedImage.convertTo(input, null, true);
         
         //Display to GUI
-        displayImage();
+        displayImageAfter();
     }
     
     public void displayImageAfterThresholdAdjust() {
@@ -99,7 +105,7 @@ public class PhotoGUI extends javax.swing.JFrame {
         buffered = VisualizeBinaryData.renderBinary(binaryInput, false, null);
 
         //Display to GUI
-        displayImage();
+        displayImageAfter();
     }
     
     public void displayImageAfterNoisyAdjust() {
@@ -107,7 +113,7 @@ public class PhotoGUI extends javax.swing.JFrame {
         buffered = ConvertBufferedImage.convertTo(noisy, null);
 
         //Display to GUI
-        displayImage();
+        displayImageAfter();
     }
 
     public void displayImageAfterDenoiseAdjust() {
@@ -115,7 +121,7 @@ public class PhotoGUI extends javax.swing.JFrame {
         buffered = ConvertBufferedImage.convertTo(denoised, null);
 
         //Display to GUI
-        displayImage();
+        displayImageAfter();
     }
 
     /**
@@ -129,7 +135,7 @@ public class PhotoGUI extends javax.swing.JFrame {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
         buttonGroup2 = new javax.swing.ButtonGroup();
-        jLabelImage = new javax.swing.JLabel();
+        jLabelImageBefore = new javax.swing.JLabel();
         jButtonBrowseImage = new javax.swing.JButton();
         jButtonSaveImage = new javax.swing.JButton();
         jRadioButtonGaussian = new javax.swing.JRadioButton();
@@ -144,8 +150,11 @@ public class PhotoGUI extends javax.swing.JFrame {
         jButtonReset = new javax.swing.JButton();
         jCheckBoxNoisy = new javax.swing.JCheckBox();
         jLabelThresholdOptions1 = new javax.swing.JLabel();
+        jLabelImageAfter = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jLabelImageBefore.setText("Original");
 
         jButtonBrowseImage.setText("Browse Image");
         jButtonBrowseImage.addActionListener(new java.awt.event.ActionListener() {
@@ -223,12 +232,14 @@ public class PhotoGUI extends javax.swing.JFrame {
 
         jLabelThresholdOptions1.setText("Noise Options:");
 
+        jLabelImageAfter.setText("Adjusted");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -241,7 +252,7 @@ public class PhotoGUI extends javax.swing.JFrame {
                                 .addGap(14, 14, 14)
                                 .addComponent(jTextFieldSaveName, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(18, 18, 18)
-                        .addComponent(jLabelImage, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jLabelImageBefore, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -259,14 +270,18 @@ public class PhotoGUI extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabelThresholdOptions1, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jButtonReset)
-                                    .addComponent(jCheckBoxNoisy, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jCheckBoxNoisy, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jCheckBoxDenoise, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jButtonSaveImage, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))))))
-                .addGap(0, 0, Short.MAX_VALUE))
+                                .addComponent(jCheckBoxDenoise, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(20, 20, 20)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabelImageAfter, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jButtonReset)
+                        .addGap(26, 26, 26)
+                        .addComponent(jButtonSaveImage, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(20, 20, 20))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -279,8 +294,9 @@ public class PhotoGUI extends javax.swing.JFrame {
                         .addComponent(jLabelName)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jTextFieldSaveName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabelImage, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(jLabelImageBefore, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabelImageAfter, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabelThresholdOptions)
@@ -289,7 +305,7 @@ public class PhotoGUI extends javax.swing.JFrame {
                 .addGap(12, 12, 12)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 10, Short.MAX_VALUE)
+                        .addGap(0, 6, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jCheckBoxDenoise)
                             .addComponent(jCheckBoxNoisy))
@@ -316,17 +332,17 @@ public class PhotoGUI extends javax.swing.JFrame {
         //Get image with FileChooser
         file = BoofSwingUtil.fileChooser(null, null, true, ".", null, BoofSwingUtil.FileTypes.IMAGES);
         buffered = UtilImageIO.loadImageNotNull(file.getAbsolutePath());
-        
+
         //Data to reset everything
         resetData = buffered;
 
         //init
         fileConverted = ConvertBufferedImage.convertFrom(buffered, true, ImageType.pl(3, GrayU8.class));
         input = fileConverted.createSameShape();
-        //System.out.println(buffered);
+        //System.out.println(input);
         
         //Display image in GUI
-        displayImage();
+        displayImageBefore();
     }//GEN-LAST:event_jButtonBrowseImageActionPerformed
 
     private void jButtonSaveImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveImageActionPerformed
@@ -394,7 +410,7 @@ public class PhotoGUI extends javax.swing.JFrame {
         buttonGroup2.clearSelection();
 
         //Display image in GUI
-        displayImage();
+        displayImageAfterReset();
     }//GEN-LAST:event_jButtonResetMouseClicked
 
     private void jComboBoxThresholdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxThresholdActionPerformed
@@ -515,7 +531,8 @@ public class PhotoGUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox jCheckBoxNoisy;
     private javax.swing.JComboBox<String> jComboBoxThreshold;
     private javax.swing.JLabel jLabelBlurOptions;
-    private javax.swing.JLabel jLabelImage;
+    private javax.swing.JLabel jLabelImageAfter;
+    private javax.swing.JLabel jLabelImageBefore;
     private javax.swing.JLabel jLabelName;
     private javax.swing.JLabel jLabelThresholdOptions;
     private javax.swing.JLabel jLabelThresholdOptions1;
