@@ -40,6 +40,9 @@ import org.apache.commons.io.FilenameUtils;
  * @author Medion
  */
 public class PhotoGUI extends javax.swing.JFrame {
+    //Get multiple files, adjust and save to desktop
+    private BufferedImage[] allImages;
+    private File[] allFiles;
     //Get file and display
     private File file;
     private BufferedImage buffered;
@@ -151,6 +154,7 @@ public class PhotoGUI extends javax.swing.JFrame {
         jCheckBoxNoisy = new javax.swing.JCheckBox();
         jLabelThresholdOptions1 = new javax.swing.JLabel();
         jLabelImageAfter = new javax.swing.JLabel();
+        jButtonBrowseFolder = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -234,25 +238,20 @@ public class PhotoGUI extends javax.swing.JFrame {
 
         jLabelImageAfter.setText("Adjusted");
 
+        jButtonBrowseFolder.setText("Browse Folder");
+        jButtonBrowseFolder.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonBrowseFolderActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabelName, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                    .addGap(9, 9, 9)
-                                    .addComponent(jButtonBrowseImage)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(14, 14, 14)
-                                .addComponent(jTextFieldSaveName, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabelImageBefore, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -272,8 +271,20 @@ public class PhotoGUI extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jCheckBoxNoisy, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(jCheckBoxDenoise, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(20, 20, 20)))
+                                .addComponent(jCheckBoxDenoise, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabelName, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(14, 14, 14)
+                                .addComponent(jTextFieldSaveName, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(8, 8, 8)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jButtonBrowseFolder)
+                                    .addComponent(jButtonBrowseImage))))
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabelImageBefore, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabelImageAfter, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -288,9 +299,11 @@ public class PhotoGUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(42, 42, 42)
+                        .addGap(20, 20, 20)
                         .addComponent(jButtonBrowseImage)
-                        .addGap(18, 18, 18)
+                        .addGap(11, 11, 11)
+                        .addComponent(jButtonBrowseFolder)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabelName)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jTextFieldSaveName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -486,6 +499,69 @@ public class PhotoGUI extends javax.swing.JFrame {
         displayImageAfterDenoiseAdjust();
     }//GEN-LAST:event_jCheckBoxDenoiseMouseClicked
 
+    private void jButtonBrowseFolderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseFolderActionPerformed
+        //Get folder with FileChooser
+        file = BoofSwingUtil.fileChooser(null, null, true, ".", null, BoofSwingUtil.FileTypes.DIRECTORIES);
+        //System.out.println(file);
+        
+        //Get folder path
+        String folderPath = file.getAbsolutePath();
+        //Put folder in File object
+        File path = new File(folderPath);
+        
+        //Get all files within folder
+        allFiles = path.listFiles();
+        
+        //Buffer all images
+        allImages = new BufferedImage[allFiles.length];
+        
+        jLabelImageBefore.setText(allFiles.length + " images in folder are being denoised.");
+        
+        for(int i = 0; i < allFiles.length; i++){
+            try {
+                allImages[i] = ImageIO.read(allFiles[i]);
+                //System.out.println(allImages[i]);
+                
+                //init
+                fileConverted = ConvertBufferedImage.convertFrom(allImages[i], true, ImageType.pl(3, GrayU8.class));
+                input = fileConverted.createSameShape();
+                //System.out.println(input);
+                
+                //Apply gaussian blur
+                GBlurImageOps.gaussian(fileConverted, input, -1, 8, null);
+               
+                //Convert from BufferedImage to display
+                allImages[i] = ConvertBufferedImage.convertTo(input, null, true);
+                
+                try {
+                    if (allImages[i] != null) {
+                        String outputName = jTextFieldSaveName.getText();
+                        String outputExtension = FilenameUtils.getExtension(allFiles[i].getAbsolutePath().toLowerCase());
+                            if (!outputName.isEmpty()) {
+                                //Write image to dekstop
+                                ImageIO.write(allImages[i], outputExtension, new File("C:\\Dev\\Erasmus CODE\\Java Advanced\\NetBeansProjects\\MyAdjustApp\\app\\src\\main\\java\\MyAdjustApp\\images\\multiple\\" + outputName + (i+1) + "." + outputExtension));
+
+                                //Open and show on desktop
+                                //Desktop desktop = Desktop.getDesktop();
+                                //desktop.open(new File("C:\Dev\Erasmus CODE\Java Advanced\NetBeansProjects\MyAdjustApp\app\src\main\java\MyAdjustApp\images\multiple\" + outputName + (i+1) + "." + outputExtension));
+                            } else {
+                                JOptionPane.showMessageDialog(rootPane, "Give a name to the file in the inputfield");
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(rootPane, "You need to select an image first");
+                        }
+                    } catch (IOException ex) {
+                        Logger.getLogger(PhotoGUI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+            } catch (IOException ex) {
+                Logger.getLogger(PhotoGUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        jLabelImageAfter.setText(allFiles.length + " images in folder are successfully denoised!");
+        //JOptionPane.showMessageDialog(rootPane, "Images saved!");
+    }//GEN-LAST:event_jButtonBrowseFolderActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -524,6 +600,7 @@ public class PhotoGUI extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
+    private javax.swing.JButton jButtonBrowseFolder;
     private javax.swing.JButton jButtonBrowseImage;
     private javax.swing.JButton jButtonReset;
     private javax.swing.JButton jButtonSaveImage;
