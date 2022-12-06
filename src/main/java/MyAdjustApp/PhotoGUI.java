@@ -8,6 +8,7 @@ import boofcv.abst.denoise.FactoryImageDenoise;
 import boofcv.abst.denoise.WaveletDenoiseFilter;
 import boofcv.abst.filter.blur.BlurFilter;
 import boofcv.abst.segmentation.ImageSuperpixels;
+import boofcv.alg.enhance.GEnhanceImageOps;
 import boofcv.alg.filter.binary.GThresholdImageOps;
 import boofcv.alg.filter.blur.BlurImageOps;
 import boofcv.alg.filter.blur.GBlurImageOps;
@@ -51,9 +52,8 @@ import org.ddogleg.struct.DogArray_I32;
  * @author Medion
  */
 public class PhotoGUI extends javax.swing.JFrame {
-    //Get multiple files, adjust and save to desktop
-    private BufferedImage[] allImages;
-    private File[] allFiles;
+    //Get folder
+    private File folder;
     //Get file and display
     private File file;
     private BufferedImage bufferedImage;
@@ -79,7 +79,7 @@ public class PhotoGUI extends javax.swing.JFrame {
     //Check if at least one option is selected before image is saved to desktop
     private boolean checkOptions = false;
     //Size of the blur kernel. Square region with a width of radius*2 + 1
-    private final int radius = 8;
+    private final int radius = 6;
 
     /**
      * Creates new form PhotoGUI
@@ -89,6 +89,10 @@ public class PhotoGUI extends javax.swing.JFrame {
         initComponents();
         //GUI in center of screen
         this.setLocationRelativeTo(null);
+        //GUI title
+        this.setTitle("MyAdjustApp");
+        //Info App
+        JOptionPane.showMessageDialog(rootPane, "Welcome to MyAdjustApp! \n\n Instructions: \n 1. Browse Folder: Select a folder with images that are noisy. All images will be denoised automatically! \n 2. Browse Image: Select an image and play around with the different filter options. Choose a good filename and save the filtered image. \n\n Thank you for using this app and have a fun experience!");
     }
     
     public void displayImageBefore() {
@@ -380,8 +384,8 @@ public class PhotoGUI extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(8, 8, 8)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jButtonBrowseFolder)
-                                    .addComponent(jButtonBrowseImage))))
+                                    .addComponent(jButtonBrowseImage)
+                                    .addComponent(jButtonBrowseFolder))))
                         .addGap(18, 18, 18)
                         .addComponent(jLabelImageBefore, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -396,19 +400,19 @@ public class PhotoGUI extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(20, 20, 20)
-                        .addComponent(jButtonBrowseImage)
-                        .addGap(11, 11, 11)
+                        .addGap(22, 22, 22)
                         .addComponent(jButtonBrowseFolder)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(12, 12, 12)
+                        .addComponent(jButtonBrowseImage)
+                        .addGap(18, 18, 18)
                         .addComponent(jLabelName)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jTextFieldSaveName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabelImageBefore, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabelImageAfter, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(12, 12, 12)
+                    .addComponent(jLabelImageBefore, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
+                    .addComponent(jLabelImageAfter, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabelThresholdOptions)
@@ -615,49 +619,55 @@ public class PhotoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jCheckBoxDenoiseMouseClicked
 
     private void jRadioButtonPaint1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jRadioButtonPaint1MouseClicked
-        //Apply meanshift filter
+        checkOptions = true;
+        //Apply meanshift-filter
         paint = FactoryImageSegmentation.meanShift(null, imageType);
         displayImageAfterPaintAdjust();
     }//GEN-LAST:event_jRadioButtonPaint1MouseClicked
 
     private void jRadioButtonPaint2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jRadioButtonPaint2MouseClicked
-        //Apply fh04 filter
+        checkOptions = true;
+        //Apply fh04-filter
         paint = FactoryImageSegmentation.fh04(new ConfigFh04(100, 30), imageType);
         displayImageAfterPaintAdjust();
     }//GEN-LAST:event_jRadioButtonPaint2MouseClicked
 
     private void jRadioButtonPaint3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jRadioButtonPaint3MouseClicked
-        //Apply watershed filter
+        checkOptions = true;
+        //Apply watershed-filter
         paint = FactoryImageSegmentation.watershed(null, imageType);
         displayImageAfterPaintAdjust();
     }//GEN-LAST:event_jRadioButtonPaint3MouseClicked
 
     private void jButtonBrowseFolderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseFolderActionPerformed
-        JOptionPane.showMessageDialog(rootPane, "With this automatication option, you are able to select a folder and denoise/blur all the noisy images within the folder.");
-        
         //Reset 'Original'
         jLabelImageBefore.setIcon( null );
         //Reset 'Preview'
         jLabelImageAfter.setIcon( null );
         
-        //Get folder with FileChooser
-        file = BoofSwingUtil.fileChooser(null, null, true, ".", null, BoofSwingUtil.FileTypes.DIRECTORIES);
-        //System.out.println(file);
+        //Get input folder with FileChooser
+        folder = BoofSwingUtil.fileChooser(null, null, true, ".", null, BoofSwingUtil.FileTypes.DIRECTORIES);
+        //System.out.println(folder);
         
         //Get folder path
-        String folderPath = file.getAbsolutePath();
+        String folderPath = folder.getAbsolutePath();
         
         //Put folder in File object
         File path = new File(folderPath);
         
         //Get all files within folder
-        allFiles = path.listFiles();
+        File[] allFiles = path.listFiles();
         
         //Buffer all images
-        allImages = new BufferedImage[allFiles.length];
+        BufferedImage[] allImages = new BufferedImage[allFiles.length];
         
         //Set jLabel text to ...
-        jLabelImageBefore.setText(allFiles.length + " images in folder are being denoised.");
+        jLabelImageBefore.setText(allFiles.length + " image(s) in folder are being denoised.");
+        
+        //Pop-up output
+        JOptionPane.showMessageDialog(rootPane, "Please choose output folder");
+        //Get output folder with FileChooser
+        folder = BoofSwingUtil.fileChooser(null, null, true, ".", null, BoofSwingUtil.FileTypes.DIRECTORIES);
         
         //Loop through all files
         for(int i = 0; i < allFiles.length; i++){
@@ -668,33 +678,47 @@ public class PhotoGUI extends javax.swing.JFrame {
                 
                 //-----Init(blur)-----
                 //Converts a buffered image into an image of the specified type (GrayU8.class)
-                fileConverted = ConvertBufferedImage.convertFrom(allImages[i], true, ImageType.pl(3, GrayU8.class));
+                Planar<GrayU8> blur = ConvertBufferedImage.convertFrom(allImages[i], true, ImageType.pl(3, GrayU8.class));
                 //Creates a new image of the same type which also has the same shape
-                input = fileConverted.createSameShape();
+                Planar<GrayU8> blurred = blur.createSameShape();
                 //System.out.println(input);
                 
                 //Apply gaussian-blur
-                GBlurImageOps.gaussian(fileConverted, input, -1, radius, null);
+                GBlurImageOps.gaussian(blur, blurred, -1, radius, null);
                
                 //Convert from BufferedImage to display
-                allImages[i] = ConvertBufferedImage.convertTo(input, null, true);
+                allImages[i] = ConvertBufferedImage.convertTo(blurred, null, true);
+                //System.out.println(allImages[i]);
+                
+                //-----Init(unblur)-----
+                //Converts a buffered image into an image of the specified type (PL_U8)
+                Planar<GrayU8> unblur = ConvertBufferedImage.convertFrom(allImages[i], true, ImageType.PL_U8);
+                //Creates a new image of the same type which also has the same shape
+                Planar<GrayU8> unblurred = unblur.createSameShape();
+
+                //Apply unblur-filter
+                GEnhanceImageOps.sharpen8(unblur, unblurred);
+                
+                //Convert from BufferedImage to display
+                allImages[i] = ConvertBufferedImage.convertTo(unblurred, null, true);
+                
                 
                 try {
                     //If the image, selected with FileChooser, is not null
                     if (allImages[i] != null) {
-                        //Get input text from 'Filename'-textfield
+                        //Give automatic filenames to images
                         Long outputName = System.currentTimeMillis();
                         //Get the extension from the chosen image
                         String outputExtension = FilenameUtils.getExtension(allFiles[i].getAbsolutePath().toLowerCase());
                         //If the 'Filename'-textfield is not empty
                         if (outputName != 0) {
                             //Write image to dekstop
-                            ImageIO.write(allImages[i], outputExtension, new File("C:/Dev/Erasmus CODE/Java Advanced/NetBeansProjects/MyAdjustApp/app/src/main/java/MyAdjustApp/images/multiple/" + outputName + "." + outputExtension));
+                            ImageIO.write(allImages[i], outputExtension, new File(folder.getAbsolutePath() + "/" + outputName + "." + outputExtension));
 
                             //Show on desktop
                             Desktop desktop = Desktop.getDesktop();
                             //Open file explorer
-                            Desktop.getDesktop().open(new File("C:/Dev/Erasmus CODE/Java Advanced/NetBeansProjects/MyAdjustApp/app/src/main/java/MyAdjustApp/images/multiple"));
+                            desktop.open(new File(folder.getAbsolutePath()));
                             //Open single image
                             //desktop.open(new File("C:\Dev\Erasmus CODE\Java Advanced\NetBeansProjects\MyAdjustApp\app\src\main\java\MyAdjustApp\images\multiple\" + outputName + (i+1) + "." + outputExtension));
                         } else {
@@ -712,7 +736,7 @@ public class PhotoGUI extends javax.swing.JFrame {
         }
         
         //Set jLabel text to ...
-        jLabelImageAfter.setText(allFiles.length + " images in folder are successfully denoised!");
+        jLabelImageAfter.setText(allFiles.length + " image(s) in folder are successfully denoised!");
         //JOptionPane.showMessageDialog(rootPane, "Images saved!");
     }//GEN-LAST:event_jButtonBrowseFolderActionPerformed
 
