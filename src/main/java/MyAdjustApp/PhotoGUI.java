@@ -69,6 +69,7 @@ public class PhotoGUI extends javax.swing.JFrame {
     //Noise
     private GrayF32 noiseInput;
     private GrayF32 noisy;
+    //Denoise
     private Planar<GrayU8> enhanced;
     //Paint
     private ImageSuperpixels paint;
@@ -549,8 +550,11 @@ public class PhotoGUI extends javax.swing.JFrame {
         buttonGroup2.clearSelection();
         buttonGroup3.clearSelection();
         jComboBoxThreshold.setSelectedIndex(0);
-
+        
         displayImageAfterReset();
+        
+        //Reset BufferedImage
+        bufferedImage = UtilImageIO.loadImageNotNull(file.getAbsolutePath());
     }//GEN-LAST:event_jButtonResetMouseClicked
 
     private void jComboBoxThresholdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxThresholdActionPerformed
