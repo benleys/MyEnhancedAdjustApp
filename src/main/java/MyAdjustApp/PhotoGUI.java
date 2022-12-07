@@ -4,8 +4,6 @@
  */
 package MyAdjustApp;
 
-import boofcv.abst.denoise.FactoryImageDenoise;
-import boofcv.abst.denoise.WaveletDenoiseFilter;
 import boofcv.abst.filter.blur.BlurFilter;
 import boofcv.abst.segmentation.ImageSuperpixels;
 import boofcv.alg.enhance.GEnhanceImageOps;
@@ -71,7 +69,7 @@ public class PhotoGUI extends javax.swing.JFrame {
     //Noise
     private GrayF32 noiseInput;
     private GrayF32 noisy;
-    private GrayF32 denoised;
+    private Planar<GrayU8> enhanced;
     //Paint
     private ImageSuperpixels paint;
     //Convert image to boofcv
@@ -92,7 +90,7 @@ public class PhotoGUI extends javax.swing.JFrame {
         //GUI title
         this.setTitle("MyAdjustApp");
         //Info App
-        JOptionPane.showMessageDialog(rootPane, "Welcome to MyAdjustApp! \n\n Instructions: \n 1. Browse Folder: Select a folder with images that are noisy. All images will be denoised automatically! \n 2. Browse Image: Select an image and play around with the different filter options. Choose a good filename and save the filtered image. \n\n Thank you for using this app and have a fun experience!");
+        JOptionPane.showMessageDialog(rootPane, "Welcome to MyEnhancedAdjustApp! \n\n Instructions: \n 1. Browse Folder: Select a folder with images that are noisy. All images will be denoised automatically! \n 2. Browse Image: Select an image and play around with the different filter options. Choose a good filename and save the filtered image. \n\n Thank you for using this app and have a fun experience!");
     }
     
     public void displayImageBefore() {
@@ -153,7 +151,7 @@ public class PhotoGUI extends javax.swing.JFrame {
 
     public void displayImageAfterDenoiseAdjust() {
         //Convert from BufferedImage to display
-        bufferedImage = ConvertBufferedImage.convertTo(denoised, null);
+        bufferedImage = ConvertBufferedImage.convertTo(enhanced, null, true);
 
         //Display to GUI
         displayImageAfter();
@@ -346,27 +344,33 @@ public class PhotoGUI extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addContainerGap(12, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jRadioButtonMedian, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jRadioButtonGaussian, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jRadioButtonMean, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBoxThreshold, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabelBlurOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLabelThresholdOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jRadioButtonMedian, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(30, 30, 30)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabelThresholdOptions1, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jCheckBoxNoisy, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jCheckBoxDenoise, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabelBlurOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(25, 25, 25)
+                                        .addComponent(jLabelThresholdOptions1, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jRadioButtonGaussian, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jCheckBoxNoisy, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jRadioButtonMean, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jCheckBoxDenoise, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabelThresholdOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(20, 20, 20)
+                                        .addComponent(jComboBoxThreshold, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                        .addGap(23, 23, 23)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabelThresholdOptions2, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
@@ -374,78 +378,63 @@ public class PhotoGUI extends javax.swing.JFrame {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jRadioButtonPaint2, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jRadioButtonPaint1, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jRadioButtonPaint3, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                    .addComponent(jRadioButtonPaint3, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(1, 1, 1))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabelName, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(14, 14, 14)
-                                .addComponent(jTextFieldSaveName, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(8, 8, 8)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jButtonBrowseImage)
-                                    .addComponent(jButtonBrowseFolder))))
-                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jButtonBrowseFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE)
+                            .addComponent(jButtonBrowseImage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabelImageBefore, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabelImageAfter, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jButtonReset)
-                        .addGap(26, 26, 26)
-                        .addComponent(jButtonSaveImage, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(20, 20, 20))))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jLabelImageAfter, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addComponent(jButtonReset)
+                            .addGap(26, 26, 26)
+                            .addComponent(jButtonSaveImage, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(20, 20, 20)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(71, 71, 71)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addComponent(jTextFieldSaveName, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabelName, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
-                        .addComponent(jButtonBrowseFolder)
-                        .addGap(12, 12, 12)
-                        .addComponent(jButtonBrowseImage)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabelName)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jButtonBrowseFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldSaveName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabelImageBefore, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
+                        .addComponent(jButtonBrowseImage, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabelImageBefore, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabelImageAfter, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabelThresholdOptions)
-                        .addComponent(jLabelBlurOptions))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabelBlurOptions)
                         .addComponent(jLabelThresholdOptions1)
-                        .addComponent(jLabelThresholdOptions2)))
+                        .addComponent(jLabelThresholdOptions))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabelThresholdOptions2)
+                        .addComponent(jLabelName)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(12, 12, 12)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(0, 6, Short.MAX_VALUE)
-                                .addComponent(jCheckBoxNoisy)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(18, 18, 18)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                            .addComponent(jButtonSaveImage)
-                                            .addComponent(jButtonReset)))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(10, 10, 10)
-                                        .addComponent(jCheckBoxDenoise)))
-                                .addGap(21, 21, 21))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jRadioButtonGaussian)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jComboBoxThreshold, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jRadioButtonMean))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jRadioButtonMedian)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGap(11, 11, 11)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jRadioButtonGaussian)
+                            .addComponent(jCheckBoxNoisy)
+                            .addComponent(jComboBoxThreshold, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jRadioButtonMean)
+                            .addComponent(jCheckBoxDenoise))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jRadioButtonMedian)
+                        .addContainerGap(13, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jRadioButtonPaint1)
@@ -453,7 +442,15 @@ public class PhotoGUI extends javax.swing.JFrame {
                         .addComponent(jRadioButtonPaint2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jRadioButtonPaint3)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jTextFieldSaveName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButtonSaveImage)
+                            .addComponent(jButtonReset))
+                        .addGap(21, 21, 21))))
         );
 
         pack();
@@ -493,13 +490,18 @@ public class PhotoGUI extends javax.swing.JFrame {
                 if (checkOptions == true) {
                     //If the 'Filename'-textfield is not empty
                     if (!outputName.isEmpty()) {
-                        //Write image to dekstop
-                        ImageIO.write(bufferedImage, outputExtension, new File("C:/Dev/Erasmus CODE/Java Advanced/NetBeansProjects/MyAdjustApp/app/src/main/java/MyAdjustApp/images/" + outputName + "." + outputExtension));                     
-                        JOptionPane.showMessageDialog(rootPane, "Image saved!");
-                        
-                        //Open and show on desktop
-                        Desktop desktop = Desktop.getDesktop();
-                        desktop.open(new File("C:/Dev/Erasmus CODE/Java Advanced/NetBeansProjects/MyAdjustApp/app/src/main/java/MyAdjustApp/images/" + outputName + "." + outputExtension));
+                          //Pop-up output
+                          JOptionPane.showMessageDialog(rootPane, "Please choose output folder");
+                          //Get output folder with FileChooser
+                          folder = BoofSwingUtil.fileChooser(null, null, true, ".", null, BoofSwingUtil.FileTypes.DIRECTORIES);
+                          
+                          //Write image to dekstop
+                          ImageIO.write(bufferedImage, outputExtension, new File(folder.getAbsolutePath() + "/" + outputName + "." + outputExtension));                     
+                          JOptionPane.showMessageDialog(rootPane, "Image saved!");
+
+                          //Open and show on desktop
+                          Desktop desktop = Desktop.getDesktop();
+                          desktop.open(new File(folder.getAbsolutePath() + "/" + outputName + "." + outputExtension));
                     } else {
                         JOptionPane.showMessageDialog(rootPane, "Give a name to the file in the inputfield");
                     }
@@ -582,7 +584,7 @@ public class PhotoGUI extends javax.swing.JFrame {
                 displayImageAfterThresholdAdjust();
                 break;
             default:
-                JOptionPane.showMessageDialog(rootPane, "Something went wrong with thresholding");
+                JOptionPane.showMessageDialog(rootPane, "Something went wrong when thresholding");
                 break;
         }
     }//GEN-LAST:event_jComboBoxThresholdActionPerformed
@@ -603,18 +605,29 @@ public class PhotoGUI extends javax.swing.JFrame {
 
     private void jCheckBoxDenoiseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBoxDenoiseMouseClicked
         checkOptions = true;
-        //Load the image
-        noiseInput = UtilImageIO.loadImage(file.getAbsolutePath(), GrayF32.class);
+        //-----Init(blur)-----
+        //Converts a buffered image into an image of the specified type (GrayU8.class)
+        Planar<GrayU8> blur = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.pl(3, GrayU8.class));
+        //Creates a new image of the same type which also has the same shape
+        Planar<GrayU8> blurred = blur.createSameShape();
+        //System.out.println(input);
+                
+        //Apply gaussian-blur
+        GBlurImageOps.gaussian(blur, blurred, -1, radius, null);
+               
+        //Convert from BufferedImage to display
+        bufferedImage = ConvertBufferedImage.convertTo(blurred, null, true);
+        //System.out.println(allImages[i]);
+                
+        //-----Init(unblur)-----
+        //Converts a buffered image into an image of the specified type (PL_U8)
+        Planar<GrayU8> enhance = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.PL_U8);
+        //Creates a new image of the same type which also has the same shape
+        enhanced = enhance.createSameShape();
 
-        //Clone the noisy image with the same shape
-        noisy = noiseInput.clone();
-        denoised = noisy.createSameShape();
-        
-        //Ready up noise removal algorithm
-        WaveletDenoiseFilter<GrayF32> denoiser = FactoryImageDenoise.waveletBayes(GrayF32.class, 4, 0, 255);
-        //Remove noise from image
-        denoiser.process(noisy, denoised);
-        
+        //Apply unblur-filter
+        GEnhanceImageOps.sharpen8(enhance, enhanced);
+
         displayImageAfterDenoiseAdjust();
     }//GEN-LAST:event_jCheckBoxDenoiseMouseClicked
 
@@ -722,10 +735,10 @@ public class PhotoGUI extends javax.swing.JFrame {
                             //Open single image
                             //desktop.open(new File("C:\Dev\Erasmus CODE\Java Advanced\NetBeansProjects\MyAdjustApp\app\src\main\java\MyAdjustApp\images\multiple\" + outputName + (i+1) + "." + outputExtension));
                         } else {
-                            JOptionPane.showMessageDialog(rootPane, "Give a name to the file in the inputfield");
+                            JOptionPane.showMessageDialog(rootPane, "Something went wrong with the filenames");
                         }
                     } else {
-                        JOptionPane.showMessageDialog(rootPane, "You need to select an image first");
+                        JOptionPane.showMessageDialog(rootPane, "You need to select a folder with images");
                     }
                 } catch (IOException ex) {
                     Logger.getLogger(PhotoGUI.class.getName()).log(Level.SEVERE, null, ex);
